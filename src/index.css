@@ -1,68 +1,138 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --bg-body: #f4f7f6;
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #cbd5e1;
+  --sidebar-active: #3b82f6;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --danger: #ef4444;
+  --success: #10b981;
+  --border: #e2e8f0;
+  --text-main: #334155;
+  --text-light: #64748b;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+* {
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
 }
-a:hover {
-  color: #535bf2;
+
+h1, h2, h3 {
+  color: #0f172a;
 }
 
 body {
-  margin: 0;
+  height: 100vh;
+  background: var(--bg-body);
+  overflow: hidden;
   display: flex;
-  place-items: center;
-  min-width: 320px;
+  flex-direction: column;
+  color: var(--text-main);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Login Screen */
+.auth-wrapper {
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.auth-card {
+  background: white;
+  width: 450px;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+.auth-card h2 {
+  margin-bottom: 5px;
+}
+
+.auth-card p {
+  color: var(--text-light);
+  margin-bottom: 30px;
+  font-size: 0.9rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.form-group input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.voucher-box {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px dashed #cbd5e1;
+  margin-bottom: 24px;
+}
+
+.voucher-box input {
+  font-family:monospace; 
+  text-transform:uppercase
+}
+
+.auth-card button {
+  width: 100%; 
+  padding: 14px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.2s;
+  font-size: 0.9rem;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-msg {
+  text-align:center; 
+  margin-top:15px; 
+  color:var(--danger); 
+  font-size:0.85rem; 
+  font-weight: 500;
 }
