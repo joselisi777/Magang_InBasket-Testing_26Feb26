@@ -1,4 +1,4 @@
-const RenderList = ({ emails, selectedId, onSelect, folder }) => {
+const RenderList = ({ emails = [], selectedId, onSelect, folder }) => {
     const list = emails
         .filter(e => e.folder === folder)
         .sort((a, b) =>

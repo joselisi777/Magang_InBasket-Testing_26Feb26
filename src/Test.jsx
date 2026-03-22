@@ -1,46 +1,105 @@
 import RenderList from "./RenderList";
 import { useState, useEffect } from "react";
 import { db } from "./config/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
+import ActionBar from "./ActionBar";
+import ReplyBox from "./ReplyBox";
+import Folder from "./Folder";
 
 const SimulationTest = () => {
 
     const [emails, setEmails] = useState([]);
     const [folder, setFolder] = useState('inbox');
     const [selectedEmail, setSelectedEmail] = useState(null);
+    const [logs, setLogs] = useState([]);
+    const [showReply, setShowReply] = useState(false);
+    const [replyText, setReplyText] = useState('');
 
     useEffect(() => {
-        const colRef = collection(db, 'emails');
+        const fetchEmails = async () => {
+            const snapshot = await getDocs(collection(db, "emails"));
 
-        const unsubscribe = onSnapshot(colRef, (snapshot) => {
             const emailsData = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
 
             setEmails(emailsData);
-        });
+        };
 
-        return () => unsubscribe();
-    }, [])
+        fetchEmails();
+    }, []);
+
+    const handleSelectEmail = (email) => {
+        setSelectedEmail(email);
+
+        setEmails(prev =>
+            prev.map(e =>
+                e.id === email.id ? { ...e, read: true } : e
+            )
+        );
+    };
+
+    const logAction = (act, det) => {
+        setLogs(prev => [
+            ...prev,
+            {
+                action: act,
+                detail: det,
+                time: new Date().toLocaleTimeString('id-ID', { hour12: false })
+            }
+        ]);
+    };
+
+    const handleSetFolder = (folderName) => {
+        setFolder(folderName);
+        setSelectedEmail(null);
+    };
+
+    const toggleReplyBox = () => {
+        setShowReply(prev => !prev);
+    };
+
+    const delegateAction = () => {
+        setEmails(prev =>
+            prev.map(e =>
+                e.id === selectedEmail.id
+                    ? { ...e, folder: 'delegated' }
+                    : e
+            )
+        );
+
+        logAction('ACTION_DELEGATE', `Delegasi Email ID ${selectedEmail.id}`);
+
+        setSelectedEmail(null);
+        setFolder('inbox');
+    };
+
+    const ignoreAction = () => {
+        setEmails(prev =>
+            prev.map(e =>
+                e.id === selectedEmail.id
+                    ? { ...e, read: true }
+                    : e
+            )
+        );
+
+        logAction('ACTION_IGNORE', `Abaikan Email ID ${selectedEmail.id}`);
+
+        setSelectedEmail(null);
+        setFolder('inbox');
+    };
+
+    const inboxCount = emails.filter(e => e.folder === 'inbox' && !e.read).length;
+    const sentCount = emails.filter(e => e.folder === 'sent').length;
+    const delegatedCount = emails.filter(e => e.folder === 'delegated').length;
 
     return (
         <div className="app-container">
-            <div className="sidebar">
-                <div className="folder">Folder</div>
-                <div className="folder-item active">
-                    <span>Kotak Masuk</span> <span id="cnt-inbox" className="badge">0</span>
-                </div>
-                <div className="folder-item">
-                    <span>Terkirim</span> <span id="cnt-sent" className="badge">0</span>
-                </div>
-                <div className="folder-item">
-                    <span>Didelegasikan</span> <span id="cnt-delegated" className="badge">0</span>
-                </div>
-            </div>
+            {<Folder folder={folder} setFolder={handleSetFolder} inboxCount={inboxCount} sentCount={sentCount} delegatedCount={delegatedCount}/>}
 
-            <div className="email-list-pane">{<RenderList
-                emails={emails} selectedId={selectedEmail?.id} folder={folder} onSelect={setSelectedEmail} />}
+            <div className="email-list-pane"> 
+                {<RenderList emails={emails} selectedId={selectedEmail?.id} folder={folder} onSelect={handleSelectEmail} />}
             </div>
 
             <div className="reading-pane">
@@ -68,20 +127,9 @@ const SimulationTest = () => {
                     </div>
                 )}
 
-                <div className="action-bar" id="actionBar">
-                    <button className="btn btn-primary">Balas</button>
-                    <button className="btn btn-outline">Delegasikan</button>
-                    <button className="btn btn-outline">Abaikan</button>
-                </div>
+                {selectedEmail && <ActionBar replyBox={toggleReplyBox} delegate={delegateAction} ignore={ignoreAction}/>}
 
-                <div className="reply-box" id="replyBox">
-                    <div className="reply-header">Balas Pesan:</div>
-                    <textarea id="replyText" className="reply-textarea" placeholder="Tuliskan draf balasan Anda di sini..."></textarea>
-                    <div className="reply-button">
-                        <button className="btn btn-outline">Batal</button>
-                        <button className="btn btn-primary">Kirim Balasan</button>
-                    </div>
-                </div>
+                {showReply && <ReplyBox replyBox={toggleReplyBox} replyText={replyText} setReply={setReplyText}/>}
             </div>
         </div>
     );
