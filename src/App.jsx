@@ -1,16 +1,22 @@
 import Login from './Login'
 import Test from './Test'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import LogsContextProvider from './contexts/LogsContext'
+import AuthContextProvider from './contexts/AuthContext'
 
 function App() {
   return (
     <>
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<Login />} />
-        <Route path='/test' element={<Test />} />
-      </Routes>
-    </BrowserRouter>
+      <BrowserRouter>
+        <LogsContextProvider>
+          <AuthContextProvider>
+            <Routes>
+              <Route path='/' element={<Login />} />
+              <Route path='/test' element={<Test />} />
+            </Routes>
+          </AuthContextProvider>
+        </LogsContextProvider>
+      </BrowserRouter>
     </>
   )
 }

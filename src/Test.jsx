@@ -1,34 +1,30 @@
 import RenderList from "./RenderList";
-import { useState, useEffect } from "react";
-import { db } from "./config/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { useState, useEffect, useContext } from "react";
 import ActionBar from "./ActionBar";
 import ReplyBox from "./ReplyBox";
 import Folder from "./Folder";
+import Email from "./Email";
+import useFetch from "./useFetch";
+import { LogsContext } from "./contexts/LogsContext";
+import { AuthContext } from "./contexts/AuthContext";
 
 const SimulationTest = () => {
 
+    const { data } = useFetch();
     const [emails, setEmails] = useState([]);
-    const [folder, setFolder] = useState('inbox');
-    const [selectedEmail, setSelectedEmail] = useState(null);
-    const [logs, setLogs] = useState([]);
-    const [showReply, setShowReply] = useState(false);
-    const [replyText, setReplyText] = useState('');
 
     useEffect(() => {
-        const fetchEmails = async () => {
-            const snapshot = await getDocs(collection(db, "emails"));
+        if (data) {
+            setEmails(data);
+        }
+    }, [data]);
 
-            const emailsData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-
-            setEmails(emailsData);
-        };
-
-        fetchEmails();
-    }, []);
+    const { logs, logAction } = useContext(LogsContext);
+    const { user } = useContext(AuthContext);
+    const [folder, setFolder] = useState('inbox');
+    const [selectedEmail, setSelectedEmail] = useState(null);
+    const [showReply, setShowReply] = useState(false);
+    const [replyText, setReplyText] = useState('');
 
     const handleSelectEmail = (email) => {
         setSelectedEmail(email);
@@ -38,17 +34,8 @@ const SimulationTest = () => {
                 e.id === email.id ? { ...e, read: true } : e
             )
         );
-    };
 
-    const logAction = (act, det) => {
-        setLogs(prev => [
-            ...prev,
-            {
-                action: act,
-                detail: det,
-                time: new Date().toLocaleTimeString('id-ID', { hour12: false })
-            }
-        ]);
+        if (email.folder === 'inbox') { logAction('READ_EMAIL', `Membaca ${email.subject}`); }
     };
 
     const handleSetFolder = (folderName) => {
@@ -94,6 +81,9 @@ const SimulationTest = () => {
     const sentCount = emails.filter(e => e.folder === 'sent').length;
     const delegatedCount = emails.filter(e => e.folder === 'delegated').length;
 
+    console.log(user);
+    console.log(logs);
+
     return (
         <div className="app-container">
             {<Folder folder={folder} setFolder={handleSetFolder} inboxCount={inboxCount} sentCount={sentCount} delegatedCount={delegatedCount}/>}
@@ -108,23 +98,7 @@ const SimulationTest = () => {
                         <p>Pilih email dari daftar untuk membaca konten.</p>
                     </div>
                 ) : (
-                    <div className="email">
-                        <div className="email-header">
-                            <div className="email-subject">{selectedEmail.subject}</div>
-
-                            <div className="email-meta">
-                                <div className="email-sender-info">
-                                    <div>{selectedEmail.from}</div>
-                                    <div>Ke: Saya</div>
-                                </div>
-                                <div className="email-time">{selectedEmail.time}</div>
-                            </div>
-                        </div>
-
-                        <div className="email-body">
-                            {selectedEmail.body}
-                        </div>
-                    </div>
+                    <Email selectedEmail={selectedEmail}/>
                 )}
 
                 {selectedEmail && <ActionBar replyBox={toggleReplyBox} delegate={delegateAction} ignore={ignoreAction}/>}

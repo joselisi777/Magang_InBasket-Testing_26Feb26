@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { db } from "./config/firebase";
-import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { AuthContext } from "./contexts/AuthContext";
 
 const Login = () => {
+    
+    const navigate = useNavigate();
+    const { startApp } = useContext(AuthContext);
     const [name, setName] = useState('');
     const [voucher, setVoucher] = useState('');
     const [error, setError] = useState(null);
@@ -40,20 +45,22 @@ const Login = () => {
             await updateDoc(docRef, {
                 status: 'used',
                 usedBy: nameInp,
-                usedAt: serverTimestamp()
+                usedAt: new Date().toISOString()
             });
 
             const role = voucher.role || "Peserta Asesmen";
+
+            await startApp(nameInp, role, codeInp);
+
             setButtonTxt('Mulai Ujian');
             setIsPending(false);
-            console.log(nameInp, role, codeInp);
+            navigate('/test');
         } catch (error) {
             setButtonTxt('Mulai Ujian');
             setIsPending(false);
             setError(error.message);
         }
     };
-
 
     return ( 
         <div className="auth-wrapper">
