@@ -1,7 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const useLogs = () => {
     const [logs, setLogs] = useState([]);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        const stored = JSON.parse(localStorage.getItem('logs')) || [];
+        setLogs(stored);
+        setLoaded(true);
+    }, []);
+
+    useEffect(() => {
+        if (loaded) {
+            localStorage.setItem('logs', JSON.stringify(logs));
+        }
+    }, [logs, loaded]);
 
     const logAction = (act, det) => {
         setLogs(prev => [

@@ -52,6 +52,10 @@ const Login = () => {
 
             await startApp(nameInp, role, codeInp);
 
+            localStorage.removeItem('logs');
+            localStorage.removeItem('emailOverrides');
+            localStorage.removeItem('sentEmails');
+            
             setButtonTxt('Mulai Ujian');
             setIsPending(false);
             navigate('/test');

@@ -1,12 +1,12 @@
-import RenderList from "./RenderList";
 import { useState, useEffect, useContext } from "react";
-import ActionBar from "./ActionBar";
-import ReplyBox from "./ReplyBox";
-import Folder from "./Folder";
-import Email from "./Email";
-import useFetch from "./useFetch";
+import RenderList from "./components/RenderList";
+import ActionBar from "./components/ActionBar";
+import ReplyBox from "./components/ReplyBox";
+import Folder from "./components/Folder";
+import Email from "./components/Email";
+import Timer from "./components/Timer";
+import useFetch from "./customHooks/useFetch";
 import { LogsContext } from "./contexts/LogsContext";
-import { AuthContext } from "./contexts/AuthContext";
 
 const SimulationTest = () => {
 
@@ -19,8 +19,7 @@ const SimulationTest = () => {
         }
     }, [data]);
 
-    const { logs, logAction } = useContext(LogsContext);
-    const { user } = useContext(AuthContext);
+    const { logAction } = useContext(LogsContext);
     const [folder, setFolder] = useState('inbox');
     const [selectedEmail, setSelectedEmail] = useState(null);
     const [showReply, setShowReply] = useState(false);
@@ -34,6 +33,13 @@ const SimulationTest = () => {
                 e.id === email.id ? { ...e, read: true } : e
             )
         );
+
+        const stored = JSON.parse(localStorage.getItem('emailOverrides')) || {};
+        stored[email.id] = {
+            ...stored[email.id],
+            read: true
+        }
+        localStorage.setItem('emailOverrides', JSON.stringify(stored));
 
         if (email.folder === 'inbox') { logAction('READ_EMAIL', `Membaca ${email.subject}`); }
     };
@@ -56,6 +62,12 @@ const SimulationTest = () => {
             )
         );
 
+        const stored = JSON.parse(localStorage.getItem('emailOverrides')) || {};
+        stored[selectedEmail.id] = {
+            ...stored[selectedEmail.id],
+            folder: 'delegated'
+        }
+        localStorage.setItem('emailOverrides', JSON.stringify(stored));
         logAction('ACTION_DELEGATE', `Delegasi Email ID ${selectedEmail.id}`);
 
         setSelectedEmail(null);
@@ -71,6 +83,12 @@ const SimulationTest = () => {
             )
         );
 
+        const stored = JSON.parse(localStorage.getItem('emailOverrides')) || {};
+        stored[selectedEmail.id] = {
+            ...stored[selectedEmail.id],
+            read: true
+        };
+        localStorage.setItem('emailOverrides', JSON.stringify(stored));
         logAction('ACTION_IGNORE', `Abaikan Email ID ${selectedEmail.id}`);
 
         setSelectedEmail(null);
@@ -80,30 +98,40 @@ const SimulationTest = () => {
     const inboxCount = emails.filter(e => e.folder === 'inbox' && !e.read).length;
     const sentCount = emails.filter(e => e.folder === 'sent').length;
     const delegatedCount = emails.filter(e => e.folder === 'delegated').length;
-
-    console.log(user);
-    console.log(logs);
-
+    
     return (
-        <div className="app-container">
-            {<Folder folder={folder} setFolder={handleSetFolder} inboxCount={inboxCount} sentCount={sentCount} delegatedCount={delegatedCount}/>}
+        <div className="app">
+            <header className="app-header">
+                <div>
+                    <div className="header-brand">InsightCore Mail</div>
+                    <div className="header-user">Memuat data peserta...</div>
+                </div>
+                <Timer duration={30 * 60}/>
+            </header>
 
-            <div className="email-list-pane"> 
-                {<RenderList emails={emails} selectedId={selectedEmail?.id} folder={folder} onSelect={handleSelectEmail} />}
-            </div>
+            <div className="app-container">
+                {<Folder folder={folder} setFolder={handleSetFolder} inboxCount={inboxCount} 
+                sentCount={sentCount} delegatedCount={delegatedCount} />}
 
-            <div className="reading-pane">
-                {!selectedEmail ? (
-                    <div className="empty-state">
-                        <p>Pilih email dari daftar untuk membaca konten.</p>
-                    </div>
-                ) : (
-                    <Email selectedEmail={selectedEmail}/>
-                )}
+                <div className="email-list-pane">
+                    {<RenderList emails={emails} selectedId={selectedEmail?.id} folder={folder} onSelect={handleSelectEmail} />}
+                </div>
 
-                {selectedEmail && <ActionBar replyBox={toggleReplyBox} delegate={delegateAction} ignore={ignoreAction}/>}
+                <div className="reading-pane">
+                    {!selectedEmail ? (
+                        <div className="empty-state">
+                            <p>Pilih email dari daftar untuk membaca konten.</p>
+                        </div>
+                    ) : (
+                        <Email selectedEmail={selectedEmail} />
+                    )}
 
-                {showReply && <ReplyBox replyBox={toggleReplyBox} replyText={replyText} setReply={setReplyText}/>}
+                    {selectedEmail && !showReply && folder !== 'sent' && folder !== 'delegated' && 
+                    <ActionBar replyBox={toggleReplyBox} delegate={delegateAction} ignore={ignoreAction} />}
+
+                    {showReply && <ReplyBox emails={emails} selectedId={selectedEmail?.id} 
+                    replyBox={toggleReplyBox} replyText={replyText} setReply={setReplyText} setEmails={setEmails} />}
+                </div>
             </div>
         </div>
     );

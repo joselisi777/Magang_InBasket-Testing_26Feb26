@@ -1,6 +1,6 @@
 const ActionBar = ({ replyBox, delegate, ignore }) => {
     return ( 
-        <div className="action-bar" id="actionBar">
+        <div className="action-bar">
             <button className="btn btn-primary" onClick={replyBox}>Balas</button>
             <button className="btn btn-outline" onClick={delegate}>Delegasikan</button>
             <button className="btn btn-outline" onClick={ignore}>Abaikan</button>
