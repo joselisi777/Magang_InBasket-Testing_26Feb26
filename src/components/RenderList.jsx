@@ -1,10 +1,18 @@
-const RenderList = ({ emails = [], selectedId, onSelect, folder }) => {
+const RenderList = ({ emails = [], selectedId, onSelect, folder, loading }) => {
     const list = emails
         .filter(e => e.folder === folder)
         .sort((a, b) =>
             a.read === b.read ? b.id - a.id : (a.read ? 1 : -1)
         );
 
+    if (loading) {
+        return (
+            <div style={{ padding: "20px", textAlign: "center", color: "#94a3b8" }}>
+                Loading...
+            </div>
+        )
+    }
+    
     if (list.length === 0) {
         return (
             <div style={{ padding: "20px", textAlign: "center", color: "#94a3b8" }}>

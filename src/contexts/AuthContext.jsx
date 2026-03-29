@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { LogsContext } from "./LogsContext";
-import { db } from "../config/firebase";
-import { addDoc, collection } from "firebase/firestore";
 
 export const AuthContext = createContext();
 
@@ -25,16 +23,21 @@ const AuthContextProvider = ({ children }) => {
         }
     }, [user, loaded]);
 
-    const startApp = async (name, role, code) => {
-        const newUser = { name, role, voucherCode: code, loginTime: new Date().toISOString() };
+    const startApp = (name, role, code) => {
+        const newUser = { 
+            name, 
+            role, 
+            voucherCode: code, 
+            loginTime: new Date().toISOString() 
+        };
+
         setUser(newUser);
 
-        await addDoc(collection(db, 'users'), newUser);
         logAction('START', `Login sukses menggunakan voucher ${code}`);
     };
 
     return ( 
-        <AuthContext.Provider value={{ user, startApp }}>
+        <AuthContext.Provider value={{ user, setUser, startApp }}>
             {children}
         </AuthContext.Provider>
      );

@@ -1,14 +1,16 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyBx7HL8LPaAjyEtuAulNKKMAsN2-A_UzmQ",
+  authDomain: "cssc-ac.firebaseapp.com",
+  databaseURL: "https://cssc-ac-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "cssc-ac",
+  storageBucket: "cssc-ac.firebasestorage.app",
+  messagingSenderId: "366302623654",
+  appId: "1:366302623654:web:a18c62c948cb68e4774167",
+  measurementId: "G-XDDBYV3P0Z"
 };
 
 // Initialize Firebase
@@ -16,4 +18,4 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Services
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = getDatabase(app);

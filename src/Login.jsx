@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "./config/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, get, update } from "firebase/database";
 import { AuthContext } from "./contexts/AuthContext";
 
 const Login = () => {
@@ -31,18 +31,18 @@ const Login = () => {
         }
 
         try {
-            const docRef = doc(db, 'vouchers', codeInp);
-            const snapshot = await getDoc(docRef);
+            const voucherRef = ref(db, 'vouchers/' + codeInp);
+            const snapshot = await get(voucherRef);
 
             if (!snapshot.exists()) {
                 throw new Error("Kode Voucher tidak valid.");
             }
 
-            const voucher = snapshot.data();
+            const voucher = snapshot.val()
 
             if (voucher.status === 'used') throw new Error(`Voucher telah digunakan oleh ${voucher.usedBy}.`);
 
-            await updateDoc(docRef, {
+            await update(voucherRef, {
                 status: 'used',
                 usedBy: nameInp,
                 usedAt: new Date().toISOString()

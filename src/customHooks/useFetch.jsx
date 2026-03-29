@@ -1,38 +1,44 @@
 import { db } from "../config/firebase";
-import { getDocs, collection } from "firebase/firestore";
+import { get, ref } from "firebase/database";
 import { useState, useEffect } from "react";
 
 const useFetch = () => {
     const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchEmails = async () => {
-            const snapshot = await getDocs(collection(db, 'emails'));
+            const snapshot = await get(ref(db, 'emails/'));
 
             const stored = JSON.parse(localStorage.getItem('emailOverrides')) || {};
             const storedSent = JSON.parse(localStorage.getItem('sentEmails')) || [];
 
-            const firestoreEmails = snapshot.docs.map(doc => {
-                const email = {
-                    id: doc.id,
-                    ...doc.data()
-                };
+            const rawData = snapshot.val();
 
-                return {
-                    ...email,
-                    read: stored[email.id]?.read ?? email.read ?? false,
-                    folder: stored[email.id]?.folder ?? email.folder ?? 'inbox'
-                };
-            });
+            const firebaseEmails = rawData
+                ? Object.entries(rawData).map(([id, value]) => {
+                    const email = {
+                        id,
+                        ...value
+                    };
 
-            const allEmails = [...firestoreEmails, ...storedSent];
+                    return {
+                        ...email,
+                        read: stored[id]?.read ?? email.read ?? false,
+                        folder: stored[id]?.folder ?? email.folder ?? 'inbox'
+                    };
+                })
+                : [];
+
+            const allEmails = [...firebaseEmails, ...storedSent];
+            setLoading(false);
             setData(allEmails);
         };
 
         fetchEmails();
     }, []);
 
-    return { data };
+    return { data, loading };
 }
  
 export default useFetch;

@@ -7,10 +7,11 @@ import Email from "./components/Email";
 import Timer from "./components/Timer";
 import useFetch from "./customHooks/useFetch";
 import { LogsContext } from "./contexts/LogsContext";
+import { AuthContext } from "./contexts/AuthContext";
 
 const SimulationTest = () => {
 
-    const { data } = useFetch();
+    const { data, loading } = useFetch();
     const [emails, setEmails] = useState([]);
 
     useEffect(() => {
@@ -19,6 +20,7 @@ const SimulationTest = () => {
         }
     }, [data]);
 
+    const { user } = useContext(AuthContext)
     const { logAction } = useContext(LogsContext);
     const [folder, setFolder] = useState('inbox');
     const [selectedEmail, setSelectedEmail] = useState(null);
@@ -104,9 +106,9 @@ const SimulationTest = () => {
             <header className="app-header">
                 <div>
                     <div className="header-brand">InsightCore Mail</div>
-                    <div className="header-user">Memuat data peserta...</div>
+                    <div className="header-user">{user.name} | {user.role}</div>
                 </div>
-                <Timer duration={30 * 60}/>
+                <Timer duration={30 * 60} emails={emails}/>
             </header>
 
             <div className="app-container">
@@ -114,7 +116,7 @@ const SimulationTest = () => {
                 sentCount={sentCount} delegatedCount={delegatedCount} />}
 
                 <div className="email-list-pane">
-                    {<RenderList emails={emails} selectedId={selectedEmail?.id} folder={folder} onSelect={handleSelectEmail} />}
+                    {<RenderList emails={emails} selectedId={selectedEmail?.id} folder={folder} onSelect={handleSelectEmail} loading={loading}/>}
                 </div>
 
                 <div className="reading-pane">
